@@ -1,0 +1,16 @@
+out/
+src/boot/
+.DS_Store
+cmake-build-default/
+cmake-build-debug/
+
+src/stages/map.c
+src/stages/map.h
+res/resources.res
+res/resources.h
+
+node_modules/
+.idea/workspace.xml
+coverage/
+
+*.tiled-session

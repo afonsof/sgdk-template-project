@@ -1,0 +1,4 @@
+[submodule "depends/sgdk"]
+	path = depends/sgdk
+	url = https://github.com/Stephane-D/SGDK.git
+	branch = 15586ce # 1.90

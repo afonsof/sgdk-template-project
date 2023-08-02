@@ -1,0 +1,20 @@
+[
+  {
+    "type": "SPRITE",
+    "id": "sample_sprite",
+    "path": "sprites/characters/sample/sprite.png",
+    "data": "3 4 FAST 5"
+  },
+  {
+    "type": "XGM",
+    "id": "song",
+    "path": "music/sonic-emerald/music.vgm",
+    "data": "AUTO"
+  },
+  {
+    "type": "WAV",
+    "id": "jump",
+    "path": "sfx/sonic-jump/sfx.wav",
+    "data": "XGM"
+  }
+]

@@ -1,0 +1,1 @@
+docker run --rm -v "$PWD":/src -u $(id -u):$(id -g) afonsof/sgdk clean

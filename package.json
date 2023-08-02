@@ -1,0 +1,28 @@
+{
+  "name": "sample-game",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "ts-node build/prebuild.ts",
+    "prebuildtest": "ts-node build/prebuild.ts",
+    "clean": "node build/command-runner.js clean",
+    "build": "node build/command-runner.js build",
+    "start": "node build/command-runner.js start",
+    "start-for-debug": "node build/command-runner.js start-for-debug",
+    "buildtest": "node build/command-runner.js build-test",
+    "test": "node build/command-runner.js test",
+    "rebuild": "npm-run-all clean build",
+    "build-and-start": "npm-run-all build start",
+    "rebuild-and-start": "npm-run-all rebuild start",
+    "build-and-test": "npm-run-all buildtest test",
+    "rebuild-and-test": "npm-run-all clean buildtest test"
+  },
+  "dependencies": {
+    "glob": "^10.3.3",
+    "glob-promise": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.6"
+  }
+}

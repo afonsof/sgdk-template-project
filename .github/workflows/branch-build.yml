@@ -1,0 +1,21 @@
+name: Branch Build
+
+on:
+  push:
+    branches:
+      - 'new*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código fonte
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm run build-and-test

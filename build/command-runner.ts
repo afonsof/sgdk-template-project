@@ -1,6 +1,6 @@
-const {spawn} = require('child_process');
-const crypto = require('crypto');
-const fs = require('fs');
+import {spawn} from 'child_process';
+import crypto from 'crypto';
+import fs from 'fs';
 const platform = process.platform;
 const log = (text) => process.stdout.write(text);
 const logError = (text) => process.stderr.write(text);
@@ -32,7 +32,7 @@ const getCommandLine = (command) => {
   return `./build/unix/${command}.sh`;
 }
 
-const runCommand = async (command) => {
+const runCommand = async (command: string): Promise<void> => {
   console.log(`Running ${command}`)
   return new Promise((resolve, reject) => {
     const childProcess = spawn(command);
@@ -58,22 +58,22 @@ const debugRegex = /add_executable\(test \$\{SRC}\n(\s+[^\n]+\n)+/g;
 
 const command = process.argv[2];
 
-const readHFilesMd5 = (files) => {
+const readHFilesMd5 = (files: string[]): [string, string][] => {
   return files.map(cFile => {
     const hFile = cFile.replace(/\.c$/, '.h');
-    const files = []
+    const f = new Array<[string, string]>()
     if (fs.existsSync(hFile)) {
-      files.push([hFile, getFileMd5(hFile)])
+      f.push([hFile, getFileMd5(hFile)])
     }
-    return files;
+    return f;
   }).flat();
 }
 
-const shouldRebuild = (command) => {
+const shouldRebuild = (command: string) => {
   const content = fs.readFileSync('./CMakeLists.txt', 'utf-8');
-  const releaseFiles = content.match(releaseRegex)[0].split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0);
-  const debugFiles = content.match(debugRegex)[0].split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0).concat(releaseFiles);
-  let filesMd5;
+  const releaseFiles = (content.match(releaseRegex) ?? [])[0]?.split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0) ?? [];
+  const debugFiles = (content.match(debugRegex) ?? [])[0]?.split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0).concat(releaseFiles) ?? [];
+  let filesMd5: Record<string,string>;
   if (command === 'debug') {
     filesMd5 = Object.fromEntries(readHFilesMd5(debugFiles));
   } else {

@@ -4,7 +4,7 @@
 #include <genesis.h>
 
 void test_assert_str(int passed, const char *expected, const char *received,
-                     const char *function, const char *file, int line
+                     const char * function, const char *file, int line
 );
 void test_assert_int(int passed, int expected, int received,
                      const char *function, const char *arquivo, int linha);

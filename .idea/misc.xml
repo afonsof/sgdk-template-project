@@ -7,6 +7,8 @@
     </libraryRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/.github" />
+      <file path="$PROJECT_DIR$/depends" />
+      <file path="$PROJECT_DIR$/out" />
     </excludeRoots>
   </component>
   <component name="JsBuildToolPackageJson" sorting="DEFINITION_ORDER" />

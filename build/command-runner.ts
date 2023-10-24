@@ -1,10 +1,14 @@
-import {spawn} from 'child_process';
+const {spawn} = require('node:child_process');
 import crypto from 'crypto';
 import fs from 'fs';
+
 const platform = process.platform;
 const log = (text) => process.stdout.write(text);
-const logError = (text) => process.stderr.write(text);
-
+const logError = (text) => {
+  if (text) {
+    process.stderr.write(text ?? []);
+  }
+}
 
 const getFileMd5 = (filePath) => {
   const md5 = crypto.createHash('md5');
@@ -22,32 +26,34 @@ try {
 const lastCommand = data.lastCommand ?? 'debug';
 const lastFiles = data.lastFiles ?? [];
 
-const getCommandLine = (command) => {
+const getCommandLine = (command: string): [string, string[]] => {
   if (platform === 'win32') {
-    return `build\\windows\\${command}.bat`;
+    return [`build\\windows\\${command}.bat`, []];
   }
   if (platform === 'darwin') {
-    return `./build/mac/${command}.sh`;
+    return ['sh', [`./build/mac/${command}.sh`]]
   }
-  return `./build/unix/${command}.sh`;
+  return ['sh', [`./build/unix/${command}.sh`]]
 }
 
-const runCommand = async (command: string): Promise<void> => {
-  console.log(`Running ${command}`)
+const runCommand = async (args: [string, string[]]): Promise<void> => {
+  console.log(`Running ${args.join(' ')}`);
   return new Promise((resolve, reject) => {
-    const childProcess = spawn(command);
-    childProcess.stdout.on('data', (data) => {
+    const cmd = spawn(args[0], args[1])
+
+    cmd.stdout.on('data', (data) => {
       log(data.toString());
     });
-    childProcess.stderr.on('data', (data) => {
-      logError(data.toString());
+
+    cmd.stderr.on('data', (data) => {
+      log(data.toString());
     });
 
-    childProcess.on('exit', (code) => {
+    cmd.on('close', (code) => {
       if (code === 0) {
-        resolve();
+        resolve()
       } else {
-        reject();
+        reject()
       }
     })
   })
@@ -73,7 +79,7 @@ const shouldRebuild = (command: string) => {
   const content = fs.readFileSync('./CMakeLists.txt', 'utf-8');
   const releaseFiles = (content.match(releaseRegex) ?? [])[0]?.split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0) ?? [];
   const debugFiles = (content.match(debugRegex) ?? [])[0]?.split(('\n')).slice(1).map(f => f.trim()).filter(f => f.length > 0).concat(releaseFiles) ?? [];
-  let filesMd5: Record<string,string>;
+  let filesMd5: Record<string, string>;
   if (command === 'debug') {
     filesMd5 = Object.fromEntries(readHFilesMd5(debugFiles));
   } else {
@@ -93,23 +99,25 @@ const shouldRebuild = (command: string) => {
 };
 
 (async () => {
-  if (command === 'debug' || command === 'release') {
-    const {changed, filesMd5} = shouldRebuild(command);
-    if (changed) {
-      log('H Files changed, rebuilding...\n');
-      await runCommand(getCommandLine('clean'));
-      await runCommand(getCommandLine(command));
+  try {
+    if (command === 'debug' || command === 'release') {
+      const {changed, filesMd5} = shouldRebuild(command);
+      if (changed) {
+        log('H Files changed, rebuilding...\n');
+        await runCommand(getCommandLine('clean'));
+        await runCommand(getCommandLine(command));
+      } else {
+        log('H Files not changed, skip rebuilding.\n');
+        await runCommand(getCommandLine(command));
+      }
+      data.lastFiles = filesMd5;
+      data.lastCommand = command;
+      fs.writeFileSync('./build-data.json', JSON.stringify(data));
     } else {
-      log('H Files not changed, skip rebuilding.\n');
       await runCommand(getCommandLine(command));
     }
-    data.lastFiles = filesMd5;
-    data.lastCommand = command;
-    fs.writeFileSync('./build-data.json', JSON.stringify(data));
-  } else {
-    await runCommand(getCommandLine(command));
+  } catch (e: any) {
+    logError(e.message);
+    process.exit(1);
   }
-})().catch((e) => {
-  logError(e);
-  process.exit(1);
-})
+})();
